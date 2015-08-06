@@ -34,7 +34,16 @@ namespace FluentValidation.TestHelper {
 			new ValidatorTester<T, TValue>(expression, validator, value, ruleSet).ValidateError(objectToTest);
 		}
 
-		public static void ShouldNotHaveValidationErrorFor<T, TValue>(this IValidator<T> validator,
+	    public static void ShouldHaveValidationErrorForWithMessage<T, TValue>(this IValidator<T> validator, Expression<Func<T, TValue>> expression, TValue value, string message, string ruleSet = null) where T : class, new() {
+	        new ValidatorTester<T, TValue>(expression, validator, value, ruleSet, message).ValidateErrorWithMessage(new T());
+	    }
+
+	    public static void ShouldHaveValidationErrorForWithMessage<T, TValue>(this IValidator<T> validator, Expression<Func<T, TValue>> expression, T objectToTest, string message, string ruleSet = null) where T : class {
+	        var value = expression.Compile()(objectToTest);
+	        new ValidatorTester<T, TValue>(expression, validator, value, ruleSet, message).ValidateErrorWithMessage(objectToTest);
+	    }
+
+	    public static void ShouldNotHaveValidationErrorFor<T, TValue>(this IValidator<T> validator,
 																	  Expression<Func<T, TValue>> expression, TValue value, string ruleSet = null) where T : class, new() {
 			new ValidatorTester<T, TValue>(expression, validator, value, ruleSet).ValidateNoError(new T());
 		}

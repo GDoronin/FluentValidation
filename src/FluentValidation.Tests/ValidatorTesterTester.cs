@@ -26,7 +26,9 @@ namespace FluentValidation.Tests {
 
 		public ValidatorTesterTester() {
 			validator = new TestValidator();
-			validator.RuleFor(x => x.Forename).NotNull();
+            validator.RuleFor(x => x.Forename).NotNull()
+                // Gordey Doronin: Temp solution so my tests could pass with Russian locale.
+                .WithMessage("'{PropertyName}' must not be empty.");
 		}
 
 		[Fact]
@@ -68,6 +70,30 @@ namespace FluentValidation.Tests {
 		public void ShouldNotHaveValidationError_should_throw_when_there_are_errors_with_preconstructed_object() {
 			typeof(ValidationTestException).ShouldBeThrownBy(() => validator.ShouldNotHaveValidationErrorFor(x => x.Forename, new Person { Forename = null }));
 		}
+
+        [Fact]
+        public void ShouldHaveValidationErrorWithMessage_should_not_throw_when_there_are_validation_errors()
+        {
+            validator.ShouldHaveValidationErrorForWithMessage(x => x.Forename, (string)null, "'Forename' must not be empty.");
+        }
+
+        [Fact]
+        public void ShouldHaveValidationErrorWithMessage_should_throw_when_there_are_no_validation_errors()
+        {
+            typeof(ValidationTestException).ShouldBeThrownBy(() => validator.ShouldHaveValidationErrorForWithMessage(x => x.Forename, "test", "'Forename' must not be empty."));
+        }
+
+        [Fact]
+        public void ShouldHaveValidationErrorWithMessage_should_not_throw_when_there_are_errors_with_preconstructed_object()
+        {
+            validator.ShouldHaveValidationErrorForWithMessage(x => x.Forename, new Person { Forename = null }, "'Forename' must not be empty.");
+        }
+
+        [Fact]
+        public void ShouldHaveValidationErrorWithMessage_should_throw_when_there_are_no_validation_errors_with_preconstructed_object()
+        {
+            typeof(ValidationTestException).ShouldBeThrownBy(() => validator.ShouldHaveValidationErrorForWithMessage(x => x.Forename, new Person { Forename = "test" }, "'Forename' must not be empty."));
+        }
 
 
 		[Fact]

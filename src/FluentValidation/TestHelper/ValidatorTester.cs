@@ -26,12 +26,14 @@ namespace FluentValidation.TestHelper {
 		private readonly TValue value;
 		private readonly MemberAccessor<T, TValue> accessor;
 		private readonly string ruleSet;
+        private readonly string message;
 
-		public ValidatorTester(Expression<Func<T, TValue>> expression, IValidator<T> validator, TValue value, string ruleSet = null) {
+		public ValidatorTester(Expression<Func<T, TValue>> expression, IValidator<T> validator, TValue value, string ruleSet = null, string message = null) {
 			this.validator = validator;
 			this.value = value;
 			accessor = expression;
-		this.ruleSet = ruleSet;
+		    this.ruleSet = ruleSet;
+		    this.message = message;
 		}
 
 		public void ValidateNoError(T instanceToValidate) {
@@ -51,5 +53,14 @@ namespace FluentValidation.TestHelper {
 				throw new ValidationTestException(string.Format("Expected a validation error for property {0}", accessor.Member.Name));
 			}
 		}
+
+	    public void ValidateErrorWithMessage(T instanceToValidate) {
+	        accessor.Set(instanceToValidate, value);
+	        var count = validator.Validate(instanceToValidate, ruleSet: ruleSet).Errors.Count(x => x.PropertyName == accessor.Member.Name && x.ErrorMessage == message);
+
+	        if (count == 0) {
+	            throw new ValidationTestException(string.Format("Expected a validation error for property {0}", accessor.Member.Name));
+	        }
+	    }
 	}
 }
